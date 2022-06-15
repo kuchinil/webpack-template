@@ -4,14 +4,39 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const CopyWebpckPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
-const TerserPlugin = require("terser-webpack-plugin");
-
+const TerserPlugin = require("terser-webpack-plugin")
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = !isDev
 
 console.log('DEVELOPMENT:', isDev);
 
+const plugins = () => {
+  const base = [
+    new HTMLWebpackPlugin({
+      template: './index.html',
+    }),
+    new CleanWebpackPlugin(),
+    new CopyWebpckPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/favicon.ico'),
+          to: path.resolve(__dirname, 'dist')
+        }
+      ]
+    }),
+    new MiniCssExtractPlugin({
+      filename: filename('css')
+    })
+  ]
+
+  if(isProd) {
+    base.push(new BundleAnalyzerPlugin())
+  }
+
+  return base
+}
 
 const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 
@@ -21,7 +46,6 @@ module.exports = {
   mode: "development",
   entry: {
     main: ['@babel/polyfill','./index.jsx'],
-    analytics: './analytics.ts'
   },
   output: {
     filename: filename('js'),
@@ -30,7 +54,6 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.json', '.png'],
     alias: {
-      '@models': path.resolve(__dirname, 'src/models'),
       '@': path.resolve(__dirname, 'src')
     }
   },
@@ -51,24 +74,7 @@ module.exports = {
     port: 9000,
   },
   devtool: isProd ? 'eval' : 'source-map',
-  plugins: [
-    new HTMLWebpackPlugin({
-      template: './index.html',
-    }),
-    new CleanWebpackPlugin(),
-    new CopyWebpckPlugin({
-      patterns: [
-        {
-          from: path.resolve(__dirname, 'src/favicon.ico'),
-          to: path.resolve(__dirname, 'dist')
-        }
-      ]
-    }),
-    new MiniCssExtractPlugin({
-      // filename: '[name].[hash].css'
-      filename: filename('css')
-    })
-  ],
+  plugins: plugins(),
   module: {
     rules: [
       {
