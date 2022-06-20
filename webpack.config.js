@@ -15,13 +15,13 @@ console.log('DEVELOPMENT:', isDev);
 const plugins = () => {
   const base = [
     new HTMLWebpackPlugin({
-      template: './index.html',
+      template: 'pug/pages/index.pug',
     }),
     new CleanWebpackPlugin(),
     new CopyWebpckPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, 'src/favicon.ico'),
+          from: path.resolve(__dirname, 'src/favicons/favicon.ico'),
           to: path.resolve(__dirname, 'dist')
         }
       ]
@@ -77,6 +77,12 @@ module.exports = {
   plugins: plugins(),
   module: {
     rules: [
+      {
+        test: /\.(pug|jade)$/i,
+        use: [
+          'pug-loader'
+        ]
+      },
       {
         test: /\.css$/i,
         use: [MiniCssExtractPlugin.loader,'css-loader'],
